@@ -1,0 +1,6 @@
+{
+  "name": "SIA ITMANV - Sistema Integral Académico y Facturación SUNAT",
+  "description": "Plataforma de gestión académica, admisión, matrículas, evaluación por competencias MINEDU, horarios sin cruces, tesorería y facturación electrónica SUNAT UBL 2.1 para el Instituto de Educación Superior Tecnológico ITMANV.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

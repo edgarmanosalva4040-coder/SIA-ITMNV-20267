@@ -1,0 +1,266 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isVerified() && (
+        request.auth.token.email == 'edgarmanosalva4040@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'fullName', 'email', 'role', 'assignedPersonName', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['uid', 'fullName', 'email', 'role', 'assignedPersonName', 'createdAt', 'updatedAt']) &&
+        data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 && data.uid.matches('^[a-zA-Z0-9_-]+$') &&
+        data.uid == request.auth.uid &&
+        data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 120 &&
+        data.email is string && data.email.size() >= 5 && data.email.size() <= 150 &&
+        data.role is string && data.role.size() <= 20 && data.role in ['DIRECTOR', 'TRAMITE', 'ACADEMICA', 'TESORERIA', 'DOCENTE', 'ESTUDIANTE'] &&
+        data.assignedPersonName is string && data.assignedPersonName.size() >= 2 && data.assignedPersonName.size() <= 120 &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidApplicant(data) {
+      return data.keys().hasAll(['documentType', 'documentNumber', 'fullName', 'programId', 'modality', 'examScore', 'dossierStatus', 'validatedBy', 'resolutionNumber', 'ownerId', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['documentType', 'documentNumber', 'fullName', 'programId', 'modality', 'examScore', 'dossierStatus', 'validatedBy', 'resolutionNumber', 'ownerId', 'createdAt', 'updatedAt']) &&
+        data.documentType is string && data.documentType.size() <= 10 && data.documentType in ['DNI', 'CE'] &&
+        data.documentNumber is string && data.documentNumber.size() >= 8 && data.documentNumber.size() <= 12 && data.documentNumber.matches('^[0-9A-Za-z-]+$') &&
+        data.fullName is string && data.fullName.size() >= 3 && data.fullName.size() <= 120 &&
+        data.programId is string && data.programId.size() <= 15 && data.programId in ['ADM_EMP', 'ADM_BAN'] &&
+        data.modality is string && data.modality.size() <= 40 && data.modality in ['ORDINARIO', 'EXONERADO_PRIMEROS_PUESTOS', 'DEPORTISTA_CALIFICADO', 'CONADIS', 'TRASLADO_EXTERNO'] &&
+        data.examScore is number && data.examScore >= 0 && data.examScore <= 100 &&
+        data.dossierStatus is string && data.dossierStatus.size() <= 30 && data.dossierStatus in ['PENDIENTE', 'VALIDADO_TRAMITE', 'OBSERVADO', 'ADMITIDO_DIRECTORAL'] &&
+        data.validatedBy is string && data.validatedBy.size() >= 2 && data.validatedBy.size() <= 100 &&
+        data.resolutionNumber is string && data.resolutionNumber.size() >= 2 && data.resolutionNumber.size() <= 60 &&
+        data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 && data.ownerId.matches('^[a-zA-Z0-9_-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidEnrollment(data) {
+      return data.keys().hasAll(['studentDocType', 'studentDocNumber', 'studentName', 'programId', 'cycle', 'shift', 'prerequisitesVerified', 'hasDebtAlert', 'sunatReceiptNumber', 'creditsEnrolled', 'status', 'registeredBy', 'ownerId', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['studentDocType', 'studentDocNumber', 'studentName', 'programId', 'cycle', 'shift', 'prerequisitesVerified', 'hasDebtAlert', 'sunatReceiptNumber', 'creditsEnrolled', 'status', 'registeredBy', 'ownerId', 'createdAt', 'updatedAt']) &&
+        data.studentDocType is string && data.studentDocType.size() <= 10 && data.studentDocType in ['DNI', 'CE'] &&
+        data.studentDocNumber is string && data.studentDocNumber.size() >= 8 && data.studentDocNumber.size() <= 12 && data.studentDocNumber.matches('^[0-9A-Za-z-]+$') &&
+        data.studentName is string && data.studentName.size() >= 3 && data.studentName.size() <= 120 &&
+        data.programId is string && data.programId.size() <= 15 && data.programId in ['ADM_EMP', 'ADM_BAN'] &&
+        data.cycle is string && data.cycle.size() <= 5 && data.cycle in ['I', 'II', 'III', 'IV', 'V', 'VI'] &&
+        data.shift is string && data.shift.size() <= 15 && data.shift in ['DIURNO', 'NOCTURNO'] &&
+        data.prerequisitesVerified is bool &&
+        data.hasDebtAlert is bool &&
+        data.sunatReceiptNumber is string && data.sunatReceiptNumber.size() >= 4 && data.sunatReceiptNumber.size() <= 30 &&
+        data.creditsEnrolled is number && data.creditsEnrolled >= 1 && data.creditsEnrolled <= 26 &&
+        data.status is string && data.status.size() <= 30 && data.status in ['MATRICULADO', 'OBSERVADO_TESORERIA', 'RETIRADO'] &&
+        data.registeredBy is string && data.registeredBy.size() >= 2 && data.registeredBy.size() <= 100 &&
+        data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 && data.ownerId.matches('^[a-zA-Z0-9_-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidGradeRecord(data) {
+      return data.keys().hasAll(['studentDocNumber', 'studentName', 'programId', 'courseCode', 'courseName', 'cycle', 'il1', 'il2', 'il3', 'finalAverage', 'competencyState', 'actaStatus', 'teacherName', 'ownerId', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['studentDocNumber', 'studentName', 'programId', 'courseCode', 'courseName', 'cycle', 'il1', 'il2', 'il3', 'finalAverage', 'competencyState', 'actaStatus', 'teacherName', 'ownerId', 'createdAt', 'updatedAt']) &&
+        data.studentDocNumber is string && data.studentDocNumber.size() >= 8 && data.studentDocNumber.size() <= 12 && data.studentDocNumber.matches('^[0-9A-Za-z-]+$') &&
+        data.studentName is string && data.studentName.size() >= 3 && data.studentName.size() <= 120 &&
+        data.programId is string && data.programId.size() <= 15 && data.programId in ['ADM_EMP', 'ADM_BAN'] &&
+        data.courseCode is string && data.courseCode.size() >= 3 && data.courseCode.size() <= 20 &&
+        data.courseName is string && data.courseName.size() >= 3 && data.courseName.size() <= 120 &&
+        data.cycle is string && data.cycle.size() <= 5 && data.cycle in ['I', 'II', 'III', 'IV', 'V', 'VI'] &&
+        data.il1 is number && data.il1 >= 0 && data.il1 <= 20 &&
+        data.il2 is number && data.il2 >= 0 && data.il2 <= 20 &&
+        data.il3 is number && data.il3 >= 0 && data.il3 <= 20 &&
+        data.finalAverage is number && data.finalAverage >= 0 && data.finalAverage <= 20 &&
+        data.competencyState is string && data.competencyState.size() <= 30 && data.competencyState in ['LOGRO_DESTACADO', 'LOGRADO', 'EN_PROCESO', 'DESAPROBADO'] &&
+        data.actaStatus is string && data.actaStatus.size() <= 30 && data.actaStatus in ['ABIERTO_DOCENTE', 'CERRADO_ACADEMICA', 'VISADO_DIRECTOR'] &&
+        data.teacherName is string && data.teacherName.size() >= 3 && data.teacherName.size() <= 100 &&
+        data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 && data.ownerId.matches('^[a-zA-Z0-9_-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidScheduleSlot(data) {
+      return data.keys().hasAll(['programId', 'cycle', 'courseCode', 'courseName', 'teacherName', 'classroom', 'dayOfWeek', 'startTime', 'endTime', 'syllabusStatus', 'assignedBy', 'ownerId', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['programId', 'cycle', 'courseCode', 'courseName', 'teacherName', 'classroom', 'dayOfWeek', 'startTime', 'endTime', 'syllabusStatus', 'assignedBy', 'ownerId', 'createdAt', 'updatedAt']) &&
+        data.programId is string && data.programId.size() <= 15 && data.programId in ['ADM_EMP', 'ADM_BAN'] &&
+        data.cycle is string && data.cycle.size() <= 5 && data.cycle in ['I', 'II', 'III', 'IV', 'V', 'VI'] &&
+        data.courseCode is string && data.courseCode.size() >= 3 && data.courseCode.size() <= 20 &&
+        data.courseName is string && data.courseName.size() >= 3 && data.courseName.size() <= 120 &&
+        data.teacherName is string && data.teacherName.size() >= 3 && data.teacherName.size() <= 100 &&
+        data.classroom is string && data.classroom.size() >= 2 && data.classroom.size() <= 30 &&
+        data.dayOfWeek is string && data.dayOfWeek.size() <= 15 && data.dayOfWeek in ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO'] &&
+        data.startTime is string && data.startTime.size() >= 4 && data.startTime.size() <= 10 &&
+        data.endTime is string && data.endTime.size() >= 4 && data.endTime.size() <= 10 &&
+        data.syllabusStatus is string && data.syllabusStatus.size() <= 20 && data.syllabusStatus in ['PUBLICADO', 'EN_REVISION'] &&
+        data.assignedBy is string && data.assignedBy.size() >= 3 && data.assignedBy.size() <= 100 &&
+        data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 && data.ownerId.matches('^[a-zA-Z0-9_-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidSunatInvoice(data) {
+      return data.keys().hasAll(['voucherType', 'seriesNumber', 'customerDocType', 'customerDocNumber', 'customerName', 'programId', 'concept', 'amountPen', 'taxRegime', 'paymentStatus', 'sunatCdrStatus', 'sunatHashCpe', 'dueDate', 'ownerId', 'createdAt', 'updatedAt']) &&
+        data.keys().hasOnly(['voucherType', 'seriesNumber', 'customerDocType', 'customerDocNumber', 'customerName', 'programId', 'concept', 'amountPen', 'taxRegime', 'paymentStatus', 'sunatCdrStatus', 'sunatHashCpe', 'dueDate', 'ownerId', 'createdAt', 'updatedAt']) &&
+        data.voucherType is string && data.voucherType.size() <= 30 && data.voucherType in ['BOLETA_ELECTRONICA', 'FACTURA_ELECTRONICA'] &&
+        data.seriesNumber is string && data.seriesNumber.size() >= 6 && data.seriesNumber.size() <= 25 &&
+        data.customerDocType is string && data.customerDocType.size() <= 10 && data.customerDocType in ['DNI', 'CE', 'RUC'] &&
+        data.customerDocNumber is string && data.customerDocNumber.size() >= 8 && data.customerDocNumber.size() <= 12 && data.customerDocNumber.matches('^[0-9A-Za-z-]+$') &&
+        data.customerName is string && data.customerName.size() >= 3 && data.customerName.size() <= 120 &&
+        data.programId is string && data.programId.size() <= 15 && data.programId in ['ADM_EMP', 'ADM_BAN'] &&
+        data.concept is string && data.concept.size() >= 3 && data.concept.size() <= 140 &&
+        data.amountPen is number && data.amountPen >= 0 && data.amountPen <= 50000 &&
+        data.taxRegime is string && data.taxRegime.size() <= 40 && data.taxRegime in ['INAFECTO_IGV_ART2_EDUCACION'] &&
+        data.paymentStatus is string && data.paymentStatus.size() <= 25 && data.paymentStatus in ['PAGADO', 'VENCIDO_MOROSO', 'PENDIENTE'] &&
+        data.sunatCdrStatus is string && data.sunatCdrStatus.size() <= 25 && data.sunatCdrStatus in ['ACEPTADO_SUNAT', 'PENDIENTE_ENVIO', 'RECHAZADO'] &&
+        data.sunatHashCpe is string && data.sunatHashCpe.size() >= 8 && data.sunatHashCpe.size() <= 80 &&
+        data.dueDate is string && data.dueDate.size() >= 8 && data.dueDate.size() <= 12 &&
+        data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 && data.ownerId.matches('^[a-zA-Z0-9_-]+$') &&
+        data.ownerId == request.auth.uid &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    match /test/{testId} {
+      allow get: if isValidId(testId);
+      allow list, create, update, delete: if false;
+    }
+
+    match /admins/{adminId} {
+      allow get: if isVerified() && isValidId(adminId) && (request.auth.uid == adminId || isAdmin());
+      allow list: if isAdmin() && resource.data.uid == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if isVerified() && isValidId(userId) && (request.auth.uid == userId || isAdmin());
+      allow list: if isVerified() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isVerified() && isValidId(userId) && request.auth.uid == userId &&
+        isValidUserProfile(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isVerified() && isValidId(userId) && isValidUserProfile(incoming()) &&
+        incoming().uid == existing().uid &&
+        (incoming().createdAt == existing().createdAt || incoming().createdAt == request.time) &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          (request.auth.uid == userId && incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'role', 'assignedPersonName', 'updatedAt', 'createdAt']))
+        );
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+
+    match /applicants/{applicantId} {
+      allow get: if isVerified() && isValidId(applicantId) && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow list: if isVerified() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow create: if isVerified() && isValidId(applicantId) &&
+        isValidApplicant(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isVerified() && isValidId(applicantId) && isValidApplicant(incoming()) &&
+        incoming().ownerId == existing().ownerId &&
+        (incoming().createdAt == existing().createdAt || incoming().createdAt == request.time) &&
+        incoming().updatedAt == request.time &&
+        (existing().dossierStatus != 'ADMITIDO_DIRECTORAL' || isAdmin()) && (
+          isAdmin() ||
+          (existing().ownerId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['dossierStatus', 'validatedBy', 'resolutionNumber', 'examScore', 'updatedAt', 'createdAt']))
+        );
+      allow delete: if isVerified() && isValidId(applicantId) && (resource.data.ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /enrollments/{enrollmentId} {
+      allow get: if isVerified() && isValidId(enrollmentId) && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow list: if isVerified() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow create: if isVerified() && isValidId(enrollmentId) &&
+        isValidEnrollment(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isVerified() && isValidId(enrollmentId) && isValidEnrollment(incoming()) &&
+        incoming().ownerId == existing().ownerId &&
+        (incoming().createdAt == existing().createdAt || incoming().createdAt == request.time) &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          (existing().ownerId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'hasDebtAlert', 'prerequisitesVerified', 'sunatReceiptNumber', 'updatedAt', 'createdAt']))
+        );
+      allow delete: if isVerified() && isValidId(enrollmentId) && (resource.data.ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /grades/{gradeId} {
+      allow get: if isVerified() && isValidId(gradeId) && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow list: if isVerified() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow create: if isVerified() && isValidId(gradeId) &&
+        isValidGradeRecord(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isVerified() && isValidId(gradeId) && isValidGradeRecord(incoming()) &&
+        incoming().ownerId == existing().ownerId &&
+        (incoming().createdAt == existing().createdAt || incoming().createdAt == request.time) &&
+        incoming().updatedAt == request.time &&
+        (existing().actaStatus != 'VISADO_DIRECTOR' || isAdmin()) && (
+          isAdmin() ||
+          (existing().ownerId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['il1', 'il2', 'il3', 'finalAverage', 'competencyState', 'actaStatus', 'updatedAt', 'createdAt']))
+        );
+      allow delete: if isVerified() && isValidId(gradeId) && (resource.data.ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /schedules/{scheduleId} {
+      allow get: if isVerified() && isValidId(scheduleId) && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow list: if isVerified() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow create: if isVerified() && isValidId(scheduleId) &&
+        isValidScheduleSlot(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isVerified() && isValidId(scheduleId) && isValidScheduleSlot(incoming()) &&
+        incoming().ownerId == existing().ownerId &&
+        (incoming().createdAt == existing().createdAt || incoming().createdAt == request.time) &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          (existing().ownerId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['classroom', 'dayOfWeek', 'startTime', 'endTime', 'syllabusStatus', 'teacherName', 'updatedAt', 'createdAt']))
+        );
+      allow delete: if isVerified() && isValidId(scheduleId) && (resource.data.ownerId == request.auth.uid || isAdmin());
+    }
+
+    match /invoices/{invoiceId} {
+      allow get: if isVerified() && isValidId(invoiceId) && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow list: if isVerified() && (resource.data.ownerId == request.auth.uid || isAdmin());
+      allow create: if isVerified() && isValidId(invoiceId) &&
+        isValidSunatInvoice(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isVerified() && isValidId(invoiceId) && isValidSunatInvoice(incoming()) &&
+        incoming().ownerId == existing().ownerId &&
+        (incoming().createdAt == existing().createdAt || incoming().createdAt == request.time) &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          (existing().ownerId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly(['paymentStatus', 'sunatCdrStatus', 'sunatHashCpe', 'updatedAt', 'createdAt']))
+        );
+      allow delete: if isVerified() && isValidId(invoiceId) && (resource.data.ownerId == request.auth.uid || isAdmin());
+    }
+  }
+}

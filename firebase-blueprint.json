@@ -1,0 +1,185 @@
+{
+  "entities": {
+    "ConnectionTest": {
+      "title": "ConnectionTest",
+      "description": "Documento de verificación de conectividad inicial con Cloud Firestore",
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "maxLength": 20 }
+      }
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Perfil de usuario autenticado con rol institucional en SIA ITMANV",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_-]+$" },
+        "fullName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "role": { "type": "string", "enum": ["DIRECTOR", "TRAMITE", "ACADEMICA", "TESORERIA", "DOCENTE", "ESTUDIANTE"] },
+        "assignedPersonName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "fullName", "email", "role", "assignedPersonName", "createdAt", "updatedAt"]
+    },
+    "Applicant": {
+      "title": "Applicant",
+      "description": "Postulante registrado en el proceso de Admisión del Instituto ITMANV",
+      "type": "object",
+      "properties": {
+        "documentType": { "type": "string", "enum": ["DNI", "CE"] },
+        "documentNumber": { "type": "string", "minLength": 8, "maxLength": 12, "pattern": "^[0-9A-Za-z-]+$" },
+        "fullName": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "programId": { "type": "string", "enum": ["ADM_EMP", "ADM_BAN"] },
+        "modality": { "type": "string", "enum": ["ORDINARIO", "EXONERADO_PRIMEROS_PUESTOS", "DEPORTISTA_CALIFICADO", "CONADIS", "TRASLADO_EXTERNO"] },
+        "examScore": { "type": "number" },
+        "dossierStatus": { "type": "string", "enum": ["PENDIENTE", "VALIDADO_TRAMITE", "OBSERVADO", "ADMITIDO_DIRECTORAL"] },
+        "validatedBy": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "resolutionNumber": { "type": "string", "minLength": 2, "maxLength": 60 },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["documentType", "documentNumber", "fullName", "programId", "modality", "examScore", "dossierStatus", "validatedBy", "resolutionNumber", "ownerId", "createdAt", "updatedAt"]
+    },
+    "Enrollment": {
+      "title": "Enrollment",
+      "description": "Ficha de Matrícula Semestral con validación de prerrequisitos y solvencia en Tesorería",
+      "type": "object",
+      "properties": {
+        "studentDocType": { "type": "string", "enum": ["DNI", "CE"] },
+        "studentDocNumber": { "type": "string", "minLength": 8, "maxLength": 12, "pattern": "^[0-9A-Za-z-]+$" },
+        "studentName": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "programId": { "type": "string", "enum": ["ADM_EMP", "ADM_BAN"] },
+        "cycle": { "type": "string", "enum": ["I", "II", "III", "IV", "V", "VI"] },
+        "shift": { "type": "string", "enum": ["DIURNO", "NOCTURNO"] },
+        "prerequisitesVerified": { "type": "boolean" },
+        "hasDebtAlert": { "type": "boolean" },
+        "sunatReceiptNumber": { "type": "string", "minLength": 4, "maxLength": 30 },
+        "creditsEnrolled": { "type": "number" },
+        "status": { "type": "string", "enum": ["MATRICULADO", "OBSERVADO_TESORERIA", "RETIRADO"] },
+        "registeredBy": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentDocType", "studentDocNumber", "studentName", "programId", "cycle", "shift", "prerequisitesVerified", "hasDebtAlert", "sunatReceiptNumber", "creditsEnrolled", "status", "registeredBy", "ownerId", "createdAt", "updatedAt"]
+    },
+    "GradeRecord": {
+      "title": "GradeRecord",
+      "description": "Registro oficial de evaluación por competencias e indicadores de logro MINEDU",
+      "type": "object",
+      "properties": {
+        "studentDocNumber": { "type": "string", "minLength": 8, "maxLength": 12, "pattern": "^[0-9A-Za-z-]+$" },
+        "studentName": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "programId": { "type": "string", "enum": ["ADM_EMP", "ADM_BAN"] },
+        "courseCode": { "type": "string", "minLength": 3, "maxLength": 20 },
+        "courseName": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "cycle": { "type": "string", "enum": ["I", "II", "III", "IV", "V", "VI"] },
+        "il1": { "type": "number" },
+        "il2": { "type": "number" },
+        "il3": { "type": "number" },
+        "finalAverage": { "type": "number" },
+        "competencyState": { "type": "string", "enum": ["LOGRO_DESTACADO", "LOGRADO", "EN_PROCESO", "DESAPROBADO"] },
+        "actaStatus": { "type": "string", "enum": ["ABIERTO_DOCENTE", "CERRADO_ACADEMICA", "VISADO_DIRECTOR"] },
+        "teacherName": { "type": "string", "minLength": 3, "maxLength": 100 },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentDocNumber", "studentName", "programId", "courseCode", "courseName", "cycle", "il1", "il2", "il3", "finalAverage", "competencyState", "actaStatus", "teacherName", "ownerId", "createdAt", "updatedAt"]
+    },
+    "ScheduleSlot": {
+      "title": "ScheduleSlot",
+      "description": "Bloque horario sin cruces asignado por Unidad Académica",
+      "type": "object",
+      "properties": {
+        "programId": { "type": "string", "enum": ["ADM_EMP", "ADM_BAN"] },
+        "cycle": { "type": "string", "enum": ["I", "II", "III", "IV", "V", "VI"] },
+        "courseCode": { "type": "string", "minLength": 3, "maxLength": 20 },
+        "courseName": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "teacherName": { "type": "string", "minLength": 3, "maxLength": 100 },
+        "classroom": { "type": "string", "minLength": 2, "maxLength": 30 },
+        "dayOfWeek": { "type": "string", "enum": ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO"] },
+        "startTime": { "type": "string", "minLength": 4, "maxLength": 10 },
+        "endTime": { "type": "string", "minLength": 4, "maxLength": 10 },
+        "syllabusStatus": { "type": "string", "enum": ["PUBLICADO", "EN_REVISION"] },
+        "assignedBy": { "type": "string", "minLength": 3, "maxLength": 100 },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["programId", "cycle", "courseCode", "courseName", "teacherName", "classroom", "dayOfWeek", "startTime", "endTime", "syllabusStatus", "assignedBy", "ownerId", "createdAt", "updatedAt"]
+    },
+    "SunatInvoice": {
+      "title": "SunatInvoice",
+      "description": "Comprobante de Pago Electrónico (Boleta B001 / Factura F001) emitido a SUNAT UBL 2.1",
+      "type": "object",
+      "properties": {
+        "voucherType": { "type": "string", "enum": ["BOLETA_ELECTRONICA", "FACTURA_ELECTRONICA"] },
+        "seriesNumber": { "type": "string", "minLength": 6, "maxLength": 25 },
+        "customerDocType": { "type": "string", "enum": ["DNI", "CE", "RUC"] },
+        "customerDocNumber": { "type": "string", "minLength": 8, "maxLength": 12, "pattern": "^[0-9A-Za-z-]+$" },
+        "customerName": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "programId": { "type": "string", "enum": ["ADM_EMP", "ADM_BAN"] },
+        "concept": { "type": "string", "minLength": 3, "maxLength": 140 },
+        "amountPen": { "type": "number" },
+        "taxRegime": { "type": "string", "enum": ["INAFECTO_IGV_ART2_EDUCACION"] },
+        "paymentStatus": { "type": "string", "enum": ["PAGADO", "VENCIDO_MOROSO", "PENDIENTE"] },
+        "sunatCdrStatus": { "type": "string", "enum": ["ACEPTADO_SUNAT", "PENDIENTE_ENVIO", "RECHAZADO"] },
+        "sunatHashCpe": { "type": "string", "minLength": 8, "maxLength": 80 },
+        "dueDate": { "type": "string", "minLength": 8, "maxLength": 12 },
+        "ownerId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["voucherType", "seriesNumber", "customerDocType", "customerDocNumber", "customerName", "programId", "concept", "amountPen", "taxRegime", "paymentStatus", "sunatCdrStatus", "sunatHashCpe", "dueDate", "ownerId", "createdAt", "updatedAt"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Registro de administrador autorizado del SIA ITMANV",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_-]+$" },
+        "email": { "type": "string", "format": "email", "maxLength": 150 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/test/{testId}": {
+      "schema": { "$ref": "#/entities/ConnectionTest" },
+      "description": "Ruta de diagnóstico de conexión con el servidor Firestore"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Perfiles de usuario aislados por propietario o administrador"
+    },
+    "/applicants/{applicantId}": {
+      "schema": { "$ref": "#/entities/Applicant" },
+      "description": "Expedientes de postulantes por modalidad de admisión"
+    },
+    "/enrollments/{enrollmentId}": {
+      "schema": { "$ref": "#/entities/Enrollment" },
+      "description": "Fichas de matrícula semestral validadas con SUNAT y prerrequisitos"
+    },
+    "/grades/{gradeId}": {
+      "schema": { "$ref": "#/entities/GradeRecord" },
+      "description": "Registros de notas por competencias e indicadores de logro"
+    },
+    "/schedules/{scheduleId}": {
+      "schema": { "$ref": "#/entities/ScheduleSlot" },
+      "description": "Horarios académicos verificados contra cruces de aula y docente"
+    },
+    "/invoices/{invoiceId}": {
+      "schema": { "$ref": "#/entities/SunatInvoice" },
+      "description": "Comprobantes electrónicos B001/F001 y control de morosidad"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Lista blanca de administradores del sistema"
+    }
+  }
+}
