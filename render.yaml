@@ -10,3 +10,18 @@ services:
         value: 20
       - key: GEMINI_API_KEY
         sync: false
+      - key: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+        value: gen-lang-client-0837436094
+      - key: NEXT_PUBLIC_FIREBASE_APP_ID
+        value: "1:502752559234:web:fd3f9c0850671601e7f49b"
+      - key: NEXT_PUBLIC_FIREBASE_API_KEY
+        value: AIzaSyDHLrb3odUxh3WalMPK0uY0pVwmTHYRob0
+      - key: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+        value: gen-lang-client-0837436094.firebaseapp.com
+      - key: NEXT_PUBLIC_FIREBASE_DATABASE_ID
+        value: ai-studio-cc6dde74-b20f-4d5c-9a76-1cbc7d6261fa
+      - key: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+        value: gen-lang-client-0837436094.firebasestorage.app
+      - key: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+        value: "502752559234"
+
